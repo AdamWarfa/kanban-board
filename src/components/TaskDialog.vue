@@ -14,7 +14,6 @@ const emit = defineEmits(["update:dialogVisible"]);
 const dialogLocal = ref(props.dialogVisible);
 const taskLocal = ref({ ...props.task });
 
-// Watch props changes to keep local refs in sync
 watch(
   () => props.dialogVisible,
   (newVal) => {
@@ -25,7 +24,7 @@ watch(
 watch(
   () => props.task,
   (newTask) => {
-    taskLocal.value = { ...newTask }; // Update taskLocal when task prop changes
+    taskLocal.value = { ...newTask };
   }
 );
 
