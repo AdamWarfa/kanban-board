@@ -44,12 +44,9 @@ const columns = ref<Columns>({
 const currentTask = ref<Task>({ title: "", description: "", color: "#ffecbe" });
 const currentColumnIndex = ref(0);
 const currentTaskIndex = ref(0);
-
 const dialogVisible = ref(false);
-
 const columnKeys = ["column1", "column2", "column3", "column4"] as const;
 const newTasks = ref<string[]>(["", "", "", ""]);
-
 const renamingColumnIndex = ref<number | null>(null);
 
 const saveColumnsToLocalStorage = () => {
@@ -64,7 +61,6 @@ const loadColumnsFromLocalStorage = () => {
 };
 
 watch(columns, saveColumnsToLocalStorage, { deep: true });
-
 onMounted(loadColumnsFromLocalStorage);
 
 const addTask = (index: number, title: string) => {
@@ -93,7 +89,6 @@ const openDialog = (index: number, taskIndex: number) => {
 const updateTask = (updatedTask: Task) => {
   const columnKey = columnKeys[currentColumnIndex.value];
   columns.value[columnKey][currentTaskIndex.value] = updatedTask;
-
   dialogVisible.value = false;
 };
 
@@ -108,21 +103,21 @@ const saveColumnTitle = () => {
 
 <template>
   <v-container>
-    <v-row>
-      <v-col v-for="(title, index) in columns.columnTitles" :key="index" cols="3">
+    <v-row class="flex-wrap">
+      <v-col v-for="(title, index) in columns.columnTitles" :key="index" class="w-full mb-4 p-2">
         <div class="text-center mb-4">
-          <div class="d-flex align-center justify-center">
+          <div class="flex items-center justify-center">
             <template v-if="renamingColumnIndex === index">
               <v-text-field v-model="columns.columnTitles[index]" label="Rename column" dense @blur="saveColumnTitle()" @keyup.enter="saveColumnTitle()" />
             </template>
             <template v-else>
-              <h2 class="text-4xl font-light">{{ title }}</h2>
+              <h2 class="text-2xl font-light">{{ title }}</h2>
             </template>
-            <v-icon @click="renameColumn(index)" icon="mdi-pencil" class="ml-2 mt-2" />
+            <v-icon @click="renameColumn(index)" icon="mdi-pencil" class="ml-2 mt-2 cursor-pointer" />
           </div>
         </div>
 
-        <draggable v-model="columns[columnKeys[index]]" tag="div" class="d-flex flex-column" :itemKey="title" :group="{ name: 'tasks', pull: true, put: true }" :animation="200">
+        <draggable v-model="columns[columnKeys[index]]" tag="div" class="flex flex-col" :itemKey="title" :group="{ name: 'tasks', pull: true, put: true }" :animation="200">
           <template #item="{ element: task, index: taskIndex }">
             <div :style="{ backgroundColor: task.color || '#ffecbe' }" class="cursor-grab mb-2 pt-2 rounded-md">
               <v-card variant="elevated" color="surface-variant">
