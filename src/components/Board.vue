@@ -6,7 +6,7 @@ import TaskDialog from "./TaskDialog.vue";
 interface Task {
   title: string;
   description: string;
-  color: string; // Added color property for customizable color
+  color: string;
 }
 
 interface Columns {
@@ -50,6 +50,8 @@ const dialogVisible = ref(false);
 const columnKeys = ["column1", "column2", "column3", "column4"] as const;
 const newTasks = ref<string[]>(["", "", "", ""]);
 
+const renamingColumnIndex = ref<number | null>(null);
+
 const saveColumnsToLocalStorage = () => {
   localStorage.setItem("taskColumns", JSON.stringify(columns.value));
 };
@@ -69,7 +71,7 @@ const addTask = (index: number, title: string) => {
   const newTask: Task = {
     title,
     description: "Description for New Task",
-    color: "#ffecbe", // Default color for new tasks
+    color: "#ffecbe",
   };
   columns.value[columnKeys[index]].push(newTask);
   newTasks.value[index] = "";
@@ -94,13 +96,32 @@ const updateTask = (updatedTask: Task) => {
 
   dialogVisible.value = false;
 };
+
+const renameColumn = (index: number) => {
+  renamingColumnIndex.value = index;
+};
+
+const saveColumnTitle = () => {
+  renamingColumnIndex.value = null;
+};
 </script>
 
 <template>
   <v-container>
     <v-row>
       <v-col v-for="(title, index) in columns.columnTitles" :key="index" cols="3">
-        <h2 class="text-4xl text-center mb-4 font-light">{{ title }}</h2>
+        <div class="text-center mb-4">
+          <div class="d-flex align-center justify-center">
+            <template v-if="renamingColumnIndex === index">
+              <v-text-field v-model="columns.columnTitles[index]" label="Rename column" dense @blur="saveColumnTitle()" @keyup.enter="saveColumnTitle()" />
+            </template>
+            <template v-else>
+              <h2 class="text-4xl font-light">{{ title }}</h2>
+            </template>
+            <v-icon @click="renameColumn(index)" icon="mdi-pencil" class="ml-2 mt-2" />
+          </div>
+        </div>
+
         <draggable v-model="columns[columnKeys[index]]" tag="div" class="d-flex flex-column" :itemKey="title" :group="{ name: 'tasks', pull: true, put: true }" :animation="200">
           <template #item="{ element: task, index: taskIndex }">
             <div :style="{ backgroundColor: task.color || '#ffecbe' }" class="cursor-grab mb-2 pt-2 rounded-md">
@@ -116,6 +137,7 @@ const updateTask = (updatedTask: Task) => {
             </div>
           </template>
         </draggable>
+
         <v-text-field v-model="newTasks[index]" label="Add new item" @keyup.enter="addTask(index, newTasks[index])" clearable />
         <v-btn @click="addTask(index, newTasks[index])" text="Add"></v-btn>
       </v-col>
